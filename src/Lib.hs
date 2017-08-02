@@ -55,7 +55,7 @@ swap_between :: Matcher -> Matcher -> [Block] -> [Block] -> [Block]
 swap_between is_begin is_end target (b:bs)
   = if is_begin b
     then [b] ++ target ++ strip_untill is_end bs
-    else b : (swap_between is_begin is_end target bs)
+    else b : swap_between is_begin is_end target bs
 swap_between _ _ _ [] = []
 
 strip_untill is_end [] = []
