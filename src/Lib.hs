@@ -4,49 +4,19 @@ module Lib
 
 import Text.Pandoc.Walk
 import Text.Pandoc.JSON
+import Flow
+
+import qualified Data.String as String
 
 -- Beware, thy who enters.
 -- What follows was written late at night, fueled upon many 'a sugary fluid.
 
 someFunc :: IO ()
-someFunc = toJSONFilter $ walkerTexasRanger
+someFunc = toJSONFilter walkerTexasRanger
 -- someFunc = putStrLn "someFunc"
 
 walkerTexasRanger :: Pandoc -> Pandoc
 walkerTexasRanger (Pandoc meta blocks) = Pandoc meta (update_guide_to_new_template blocks)
-
-handleblock :: Block -> Block
-handleblock (Header 1 attrs inlines) = Header 2 attrs (capitalizeInlines inlines)
-handleblock nonlevel1header = nonlevel1header
-
-capitalizeInlines inlines = inlines
-
-{-
-Now, let's see if we can do what we actually wanted.
-
-Replace text like this:
-
-## Forslag til vurderingskriterier {.challenge}
-
-Something something darkside
-
-## Forutsetninger og utstyr {.challenge}
-
-To text like this:
-
-## Forslag til vurderingskriterier {.challenge}
-
-Det er mange ulike måter en kan vurdere et programmeringsprosjekt, og her må en
-selv vurdere hva som er den beste måten ut ifra hvilket fag man jobber i,
-hvilken aldergruppe og hvilket nivå elevene er på, hva man ønsker å teste og
-hvor mye tid man har til rådighet til å jobbe med prosjektet. I vårt
-[lærerdokument](../../pages/hvordan_bruke_lærerveiledning.html) har vi blant
-annet beskrevet ulike måter dette kan gjøres på, tillegg til en del andre
-nyttige tips til hvordan man underviser i programmering.
-
-## Forutsetninger og utstyr {.challenge}
-
--}
 
 -- Step 1: encode the above text into Pandoc's internat format. Should be easy.
 -- Use a dummy document that contains that text, and convert it to native.
@@ -54,7 +24,7 @@ filltext_encoded = [Para [Str "Det",Space,Str "er",Space,Str "mange",Space,Str "
 
 -- (header_level, header_text for matches)
 begin_header_match = [Str "Forslag",Space,Str "til",Space,Str "vurderingskriterier"]
-end_header_text = [Str "Forutsetninger",Space,Str "og",Space,Str "utstyr"]
+end_header_match = [Str "Forutsetninger",Space,Str "og",Space,Str "utstyr"]
 
 -- Seems to work. Commit!
 
@@ -65,12 +35,6 @@ matches_header :: [Inline] -> Block -> Bool
 matches_header spec (Header 2 attrs inlines) =
   inlines == spec
 matches_header _ _ = False
-
-subWithNANANA :: Block -> Block
-subWithNANANA b =
-  if begin_header_match `matches_header` b
-  then Header 1 ("BATMAN", [], []) [Str "NANANA"]
-  else b
 
 sampleDocument = [Header 1 ("first-header",[],[]) [Str "First",Space,Str "header"]
                  ,Para [Str "Some",Space,Str "paragraph",Space,Str "in",Space,Str "between."]
@@ -90,7 +54,7 @@ swap_between is_begin is_end target (b:bs)
   = if is_begin b
     then [b] ++ target ++ strip_untill is_end bs
     else b : swap_between is_begin is_end bs target
-swap_between _ _ [] _ = []
+swap_between _ _ _ [] = []
 
 strip_untill is_end [] = []
 strip_untill is_end (b:bs)
@@ -100,8 +64,19 @@ strip_untill is_end (b:bs)
 
 -- Now I think we have what we need. Put it together!
 
+nope = \_ -> False
+
 update_guide_to_new_template
   = swap_between
       (matches_header begin_header_match) -- The beginning of the match
-      (matches_header end_header_text) -- The end of the match
+      (matches_header end_header_match) -- The end of the match
       filltext_encoded -- Replacing with the encoded filltext
+
+runtests =
+  update_guide_to_new_template sampleDocument |> showthings
+
+showthings x =
+  x
+    |> map show
+    |> unlines
+    |> putStr
