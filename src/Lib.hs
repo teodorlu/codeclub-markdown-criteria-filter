@@ -22,6 +22,8 @@ walkerTexasRanger (Pandoc meta blocks) = Pandoc meta (update_guide_to_new_templa
 -- Use a dummy document that contains that text, and convert it to native.
 filltext_encoded = [Para [Str "Det",Space,Str "er",Space,Str "mange",Space,Str "ulike",Space,Str "m\229ter",Space,Str "en",Space,Str "kan",Space,Str "vurdere",Space,Str "et",Space,Str "programmeringsprosjekt,",Space,Str "og",Space,Str "her",Space,Str "m\229",Space,Str "en",SoftBreak,Str "selv",Space,Str "vurdere",Space,Str "hva",Space,Str "som",Space,Str "er",Space,Str "den",Space,Str "beste",Space,Str "m\229ten",Space,Str "ut",Space,Str "ifra",Space,Str "hvilket",Space,Str "fag",Space,Str "man",Space,Str "jobber",Space,Str "i,",SoftBreak,Str "hvilken",Space,Str "aldergruppe",Space,Str "og",Space,Str "hvilket",Space,Str "niv\229",Space,Str "elevene",Space,Str "er",Space,Str "p\229,",Space,Str "hva",Space,Str "man",Space,Str "\248nsker",Space,Str "\229",Space,Str "teste",Space,Str "og",SoftBreak,Str "hvor",Space,Str "mye",Space,Str "tid",Space,Str "man",Space,Str "har",Space,Str "til",Space,Str "r\229dighet",Space,Str "til",Space,Str "\229",Space,Str "jobbe",Space,Str "med",Space,Str "prosjektet.",Space,Str "I",SoftBreak,Str "v\229rt",Space,Link ("",[],[]) [Str "l\230rerdokument"] ("../../pages/hvordan_bruke_l\230rerveiledning.html",""),Space,Str "har",Space,Str "vi",SoftBreak,Str "blant",Space,Str "annet",Space,Str "beskrevet",Space,Str "ulike",Space,Str "m\229ter",Space,Str "dette",Space,Str "kan",Space,Str "gj\248res",Space,Str "p\229,",Space,Str "tillegg",Space,Str "til",Space,Str "en",Space,Str "del",Space,Str "andre",SoftBreak,Str "nyttige",Space,Str "tips",Space,Str "til",Space,Str "hvordan",Space,Str "man",Space,Str "underviser",Space,Str "i",Space,Str "programmering."]]
 
+filltext_small = [Para [Str "YOLO"]]
+
 -- (header_level, header_text for matches)
 begin_header_match = [Str "Forslag",Space,Str "til",Space,Str "vurderingskriterier"]
 end_header_match = [Str "Forutsetninger",Space,Str "og",Space,Str "utstyr"]
@@ -53,7 +55,7 @@ swap_between :: Matcher -> Matcher -> [Block] -> [Block] -> [Block]
 swap_between is_begin is_end target (b:bs)
   = if is_begin b
     then [b] ++ target ++ strip_untill is_end bs
-    else b : swap_between is_begin is_end bs target
+    else b : (swap_between is_begin is_end target bs)
 swap_between _ _ _ [] = []
 
 strip_untill is_end [] = []
